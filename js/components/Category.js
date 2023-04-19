@@ -8,7 +8,7 @@ export function createCategory(app) {
 
         const b1 = createElement('button', {className: 'category__card'})
         b1.append(createElement('span', {className: 'category__title', textContent: data.title}))
-        b1.append(createElement('span', {className: 'category__pairs', textContent: `${data.length} пар`}))
+        b1.append(createElement('span', {className: 'category__pairs', textContent: declOfNum(data.length, ['пара', 'пары', 'пар'])}))
         
         const b2 = createElement('button', {className: 'category__btn category__edit', ariaLabel: 'редактировать'})
         const b3 = createElement('button', {className: 'category__btn category__del', ariaLabel: 'удалить' })
@@ -36,4 +36,12 @@ export function createCategory(app) {
     container.append(categoryList)
 
     return {mount, unmount, categoryList}
+}
+
+function declOfNum (n, titles) {
+    const d = n % 10, h = n % 100
+    return `${n} ${titles[
+        d == 1 && h != 11
+        ? 0
+        : d >= 2 && d <= 4 && (h < 10 || h >= 20) ? 1 : 2]}`
 }
