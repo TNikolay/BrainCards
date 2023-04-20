@@ -3,41 +3,47 @@ import { showAllert } from "./ShowAlert.js"
 
 export function createPairs(app) {
 
-  const unmount = () => { pairs.remove() }
+  const unmount = () => { 
+    pairs.remove() 
+    btnCard.removeEventListener('click', flipCard)
+    cards = []
+  }
+
   const mount = (data) => {
-    cardController(data.pairs)
+    cards = data.pairs
+    cardController()
     app.append(pairs)
   }
 
-  const cardController = data => {
-    const flipCard = () => {
-      console.log('flipCard', index, data[0])
+  const flipCard = () => {
+    console.log('flipCard', index, cards[0])
 
-      btnCard.classList.add('card__item_flipped') 
-      btnCard.removeEventListener('click', flipCard)
+    btnCard.classList.add('card__item_flipped') 
+    btnCard.removeEventListener('click', flipCard)
 
+    setTimeout(() => { 
+      btnCard.classList.remove('card__item_flipped') 
       setTimeout(() => { 
-        btnCard.classList.remove('card__item_flipped') 
-        setTimeout(() => { 
-          if (++index == data.length)  {
-            front.textContent = 'The end'
-            showAllert('Возвращаемся на главную', 2000)
-            setTimeout(() => { btnReturn.click(); }, 2000);
-            return
-          }
+        if (++index == cards.length)  {
+          front.textContent = 'The end'
+          showAllert('Возвращаемся на главную', 2000)
+          setTimeout(() => { btnReturn.click(); }, 2000);
+          return
+        }
 
-          front.textContent = data[index][0]
-          back.textContent = data[index][1]      
+        front.textContent = cards[index][0]
+        back.textContent = cards[index][1]      
 
-          setTimeout(() => { btnCard.addEventListener('click', flipCard) }, 200)
-        }, 100)
-      }, 1000)
-    }
+        setTimeout(() => { btnCard.addEventListener('click', flipCard) }, 200)
+      }, 100)
+    }, 1000)
+  }
 
-    data.sort(() => Math.random() - 0.5)
-    let index = 0;
-    front.textContent = data[index][0]
-    back.textContent = data[index][1]
+  const cardController = () => {
+    cards.sort(() => Math.random() - 0.5)
+    index = 0;
+    front.textContent = cards[index][0]
+    back.textContent = cards[index][1]
  
     btnCard.addEventListener('click', flipCard)
   }
@@ -48,6 +54,8 @@ export function createPairs(app) {
   const btnCard = createElement("button", { className: "card__item" })
   const front = createElement("span", { className: "card__front", textContent: "front"});
   const back = createElement("span", { className: "card__back", textContent: "back"});
+
+  let index = 0, cards = []
 
   btnCard.append(front, back)
   container.append(btnReturn, btnCard)
