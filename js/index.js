@@ -1,8 +1,9 @@
-import { fetchCards, fetchCategories } from "../service/api.service.js";
+import { fetchCards, fetchCategories, fetchCreateCategory, fetchDeleteCategory, fetchEditCategory } from "../service/api.service.js";
 import { createCategory } from "./components/Category.js";
 import { createEditCategory } from "./components/EditCategoryy.js";
 import { createHeader } from "./components/Header.js";
 import { createPairs } from "./components/Pairs.js";
+import { showAllert } from "./components/ShowAlert.js";
 import { createElement } from "./utils/utils.js";
 
 
@@ -25,6 +26,37 @@ async function initApp() {
 
   const allSectionUnmount = () => { [categoryObj, editCategoryObj, pairsObj].forEach(v => v.unmount()) }
 
+  const postHandler = async () => {
+    const data = editCategoryObj.parseData()
+    const category = await fetchCreateCategory(data)
+    if (category.error) {
+       showAllert(category.error.message)
+       return
+      }
+    
+    showAllert(`Новая категория ${data.title} добавлена`)
+    allSectionUnmount()
+    categoryObj.mount(category)
+    headerObj.updateHeaderTitle('Категории')
+  }
+  
+  const pathHandler = async () => {
+    const data = editCategoryObj.parseData()
+    const category = await fetchEditCategory(editCategoryObj.btnSave.dataset.id, data)
+
+    if (category.error) {
+      showAllert(category.error.message)
+      return
+     }
+   
+   showAllert(`Категория ${data.title} обновлена`)
+   allSectionUnmount()
+   categoryObj.mount(category)
+   headerObj.updateHeaderTitle('Категории')
+  }
+
+  const editCategoryCancelHandler = () => { if (confirm('Sure?')) renderIndex() }
+
   const headerParent = document.querySelector('.header')
   const app = document.querySelector('#app')
   const headerObj = createHeader(headerParent)
@@ -40,6 +72,9 @@ async function initApp() {
     headerObj.updateHeaderTitle('Новая категория')
     allSectionUnmount()
     editCategoryObj.mount()
+    editCategoryObj.btnSave.addEventListener('click', postHandler)
+    editCategoryObj.btnSave.removeEventListener('click', pathHandler)
+    editCategoryObj.btnCancel.addEventListener('click', editCategoryCancelHandler)
   })
 
 
@@ -51,10 +86,18 @@ async function initApp() {
         allSectionUnmount()
         headerObj.updateHeaderTitle('Редактирование')
         editCategoryObj.mount(dataCards)
+        editCategoryObj.btnSave.addEventListener('click', pathHandler)
+        editCategoryObj.btnSave.removeEventListener('click', postHandler)
+        editCategoryObj.btnCancel.addEventListener('click', editCategoryCancelHandler)
         return
     }
     
     if (target.closest('.category__del')) {
+      if (confirm('Sure?')) {
+        fetchDeleteCategory(categoryItem.dataset.id)
+        showAllert('Категория удалена')
+        categoryItem.remove()
+      }
       return
     }
 
@@ -65,6 +108,4 @@ async function initApp() {
       pairsObj.mount(dataCards)
     }
   })
-
-  
 }

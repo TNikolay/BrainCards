@@ -14,6 +14,9 @@ export function createEditCategory(app) {
 
     const rows = data.pairs.map(createTRCell)
     tbody.append(...rows, createTRCell(['', '']))
+
+    btnSave.dataset.id = data.id ? data.id : ''
+
     app.append(editCategory)
   }
 
@@ -22,9 +25,9 @@ export function createEditCategory(app) {
 
   const createTRCell = (dataArray) => {
     const tr = createElement("tr");
-    const tableCell1 = createElement("th", { className: "table__cell table__cell_one", textContent: dataArray[0], contentEditable: true });
-    const tableCell2 = createElement("th", { className: "table__cell table__cell_two", textContent: dataArray[1], contentEditable: true });
-    const tableCellDel = createElement("th", { className: "table__cell" });
+    const tableCell1 = createElement("td", { className: "table__cell table__cell_one", textContent: dataArray[0], contentEditable: true });
+    const tableCell2 = createElement("td", { className: "table__cell table__cell_two", textContent: dataArray[1], contentEditable: true });
+    const tableCellDel = createElement("td", { className: "table__cell" });
     const delRow = createElement("button", { className: "table__del", textContent: "x" });
 
     delRow.addEventListener("click", () => { if (confirm('Sure?')) tr.remove() });
@@ -33,6 +36,23 @@ export function createEditCategory(app) {
     tr.append(tableCell1, tableCell2, tableCellDel)
 
     return tr
+  }
+
+  const parseData =() => {
+    const cellsMain = document.querySelectorAll('.table__cell_one')
+    const cellsSecond = document.querySelectorAll('.table__cell_two')
+    const data = { pairs: [] }
+
+    for (let i = 0; i < cellsMain.length; i++) {
+      const t1 = cellsMain[i].textContent.trim(), t2 = cellsSecond[i].textContent.trim()
+      if (t1 && t2) data.pairs.push([t1, t2])
+    }
+
+    const t = title.textContent.trim()
+    if (t && t != TITLE) data.title = t
+
+    if (btnSave.dataset.id) data.id = btnSave.dataset.id
+    return data
   }
 
   const editCategory = createElement("section", { className: "edit section-offset" });
@@ -62,5 +82,5 @@ export function createEditCategory(app) {
   btnWrapper.append(btnAddRow, btnSave, btnCancel)
   container.append(title, table, btnWrapper)
 
-  return { mount, unmount };
+  return { mount, unmount, parseData, btnSave, btnCancel };
 }

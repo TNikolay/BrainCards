@@ -13,6 +13,7 @@ export function createPairs(app) {
     cards = data.pairs
     cardController()
     app.append(pairs)
+    
   }
 
   const flipCard = () => {
